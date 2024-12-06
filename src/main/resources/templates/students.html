@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des étudiants</title>
+    <script>
+        async function loadStudents() {
+            const response = await fetch('/students');
+            const students = await response.json();
+            const tableBody = document.getElementById('students-table-body');
+            tableBody.innerHTML = '';
+            students.forEach(student => {
+                const row = `<tr>
+                    <td>${student.id}</td>
+                    <td>${student.firstName}</td>
+                    <td>${student.lastName}</td>
+                    <td>${student.age}</td>
+                    <td>${student.phone}</td>
+                    <td>
+                        <button onclick="editStudent(${student.id})">Modifier</button>
+                        <button onclick="deleteStudent(${student.id})">Supprimer</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        async function deleteStudent(id) {
+            await fetch(`/students/${id}`, { method: 'DELETE' });
+            loadStudents();
+        }
+
+        async function addStudent() {
+            const student = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                age: parseInt(document.getElementById('age').value),
+                phone: document.getElementById('phone').value
+            };
+            await fetch('/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(student)
+            });
+            loadStudents();
+        }
+    </script>
+</head>
+<body onload="loadStudents()">
+    <h1>Liste des étudiants</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Âge</th>
+                <th>Téléphone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="students-table-body"></tbody>
+    </table>
+    <h2>Ajouter un étudiant</h2>
+    <form onsubmit="addStudent(); return false;">
+        <label for="firstName">Prénom:</label>
+        <input type="text" id="firstName" required>
+        <label for="lastName">Nom:</label>
+        <input type="text" id="lastName" required>
+        <label for="age">Âge:</label>
+        <input type="number" id="age" required>
+        <label for="phone">Téléphone:</label>
+        <input type="text" id="phone" required>
+        <button type="submit">Ajouter</button>
+    </form>
+</body>
+</html>
